@@ -14,6 +14,8 @@ export const users = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  image: text("image"),
   role: userRoleEnum("role").notNull().default("viewer"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull(),
@@ -25,6 +27,8 @@ export const sessions = pgTable("session", {
   expiresAt: timestamp("expires_at").notNull(),
   token: text("token").notNull().unique(),
   userId: text("user_id").notNull().references(() => users.id),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
