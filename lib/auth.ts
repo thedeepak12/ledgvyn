@@ -34,6 +34,17 @@ export const auth = betterAuth({
       create: {
         before: async (user, context) => {
           const body = context?.body as any;
+
+          if (body?.projectId) {
+            return {
+              data: {
+                ...user,
+                projectId: body.projectId,
+                role: body.role,
+              }
+            }
+          }
+
           const companyName = body?.companyName;
           const projectId = uuidv4();
 
