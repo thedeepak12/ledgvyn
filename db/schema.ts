@@ -10,6 +10,13 @@ import {
 export const userRoleEnum = pgEnum("user_role", ["admin", "analyst", "viewer"]);
 export const recordTypeEnum = pgEnum("record_type", ["income", "expense"]);
 
+export const projects = pgTable("project", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const users = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -18,6 +25,7 @@ export const users = pgTable("user", {
   image: text("image"),
   role: userRoleEnum("role").notNull().default("viewer"),
   isActive: boolean("is_active").notNull().default(true),
+  projectId: text("project_id").references(() => projects.id),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
@@ -50,6 +58,7 @@ export const financialRecords = pgTable("financial_record", {
   category: text("category").notNull(),
   description: text("description").notNull(),
   date: timestamp("date").notNull().defaultNow(),
+  projectId: text("project_id").notNull().references(() => projects.id),
   userId: text("user_id").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
