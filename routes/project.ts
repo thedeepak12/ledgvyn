@@ -5,6 +5,37 @@ import { createUserSchema } from "../lib/validations";
 
 const router: Router = Router();
 
+/**
+ * @swagger
+ * /api/project/users:
+ *   post:
+ *     summary: Invite a new team member to your project
+ *     tags: [Project Management]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password, name, role]
+ *             properties:
+ *               email: { type: string, format: email, example: "newuser@company.com" }
+ *               password: { type: string, format: password, example: "B8uqC/HewKWFPQOJtXjgLg==!" }
+ *               name: { type: string, example: "Analyst User" }
+ *               role: { type: string, enum: [analyst, viewer], example: "analyst" }
+ *     responses:
+ *       201:
+ *         description: Team member created and linked to the admin's project
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Unauthorized (Invalid or missing session cookie)
+ *       403:
+ *         description: Forbidden (Only Admins can manage the team)
+ */
+
 router.post("/users", authGuard, async (req: Request, res: Response) => {
   const adminUser = (req as any).user;
   const adminProjectId = (req as any).projectId;

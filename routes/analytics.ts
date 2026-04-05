@@ -14,6 +14,35 @@ const filterSchema = z.object({
   categories: z.string().optional(),
 });
 
+/**
+ * @swagger
+ * /api/analytics/summary:
+ *   get:
+ *     summary: Get overall financial totals
+ *     tags: [Analytics]
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         description: Filter records after this date (ISO)
+ *       - in: query
+ *         name: endDate
+ *         description: Filter records before this date (ISO)
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [income, expense]
+ *         description: Filter records by type
+ *       - in: query
+ *         name: categories
+ *         description: Filter records by category (comma separated)
+ *     responses:
+ *       200:
+ *         description: Dashboard totals for income, expense and net
+ *       400:
+ *         description: Failed to fetch summary
+ */
+
 router.get("/summary", authGuard, async (req, res) => {
   try {
     const filters = filterSchema.parse(req.query);
@@ -52,6 +81,33 @@ router.get("/summary", authGuard, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/analytics/categories:
+ *   get:
+ *     summary: Get category-wise spending breakdown
+ *     tags: [Analytics]
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         description: Filter records after this date (ISO)
+ *       - in: query
+ *         name: endDate
+ *         description: Filter records before this date (ISO)
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [income, expense]
+ *     responses:
+ *       200:
+ *         description: Array of categories with totals and counts
+ *       400:
+ *         description: Failed to fetch categories
+ *       403:
+ *         description: Forbidden (Viewers cannot access breakdowns)
+ */
+
 router.get("/categories", authGuard, async (req, res) => {
   try {
     const userRole = (req as any).user.role;
@@ -84,6 +140,28 @@ router.get("/categories", authGuard, async (req, res) => {
     return res.status(400).json({ error: "Failed to fetch categories"});
   }
 });
+
+/**
+ * @swagger
+ * /api/analytics/trends:
+ *   get:
+ *     summary: Get monthly financial trajectory
+ *     tags: [Analytics]
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         description: Filter records after this date (ISO)
+ *       - in: query
+ *         name: endDate
+ *         description: Filter records before this date (ISO)
+ *     responses:
+ *       200:
+ *         description: Array of monthly aggregated income/expense
+ *       400:
+ *         description: Failed to fetch trends
+ *       403:
+ *         description: Forbidden (Viewers cannot access trends)
+ */
 
 router.get("/trends", authGuard, async (req, res) => {
   try {

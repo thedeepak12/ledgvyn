@@ -8,6 +8,40 @@ import { recordSchema } from "../lib/validations";
 
 const router: Router = Router();
 
+/**
+ * @swagger
+ * /api/records:
+ *   post:
+ *     summary: Create a new financial record
+ *     tags: [Financial Records]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [amount, type, category, description, date]
+ *             properties:
+ *               amount: { type: number, example: 450 }
+ *               type: { type: string, enum: [income, expense], example: "expense" }
+ *               category: { type: string, example: "Marketing" }
+ *               description: { type: string, example: "Facebook Ads" }
+ *               date: { type: string, format: date, example: "2024-03-25" }
+ *     responses:
+ *       201:
+ *         description: Record successfully created
+ *       400:
+ *         description: Validation Error (Invalid amount, missing fields, etc.)
+ *       401:
+ *         description: Unauthorized (Invalid or missing session cookie)
+ *       403:
+ *         description: Forbidden (Only Admins can create records)
+ *       500:
+ *         description: Failed to create record
+ */
+
 router.post("/", authGuard, async (req: Request, res: Response) => {
   const user = (req as any).user;
   if (user.role !== "admin") {
@@ -42,6 +76,25 @@ router.post("/", authGuard, async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/records:
+ *   get:
+ *     summary: Get all financial records
+ *     tags: [Financial Records]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of records
+ *       401:
+ *         description: Unauthorized (Invalid or missing session cookie)
+ *       403:
+ *         description: Access Denied (Viewers cannot see raw data)
+ *       500:
+ *         description: Failed to fetch records
+ */
+
 router.get("/", authGuard, async (req: Request, res: Response) => {
 	const user = (req as any).user;
 	if (user.role === "viewer") {
@@ -61,6 +114,47 @@ router.get("/", authGuard, async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Failed to fetch records." });
   }
 });
+
+/**
+ * @swagger
+ * /api/records/{id}:
+ *   put:
+ *     summary: Update a financial record
+ *     tags: [Financial Records]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The record ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount: { type: number, example: 500 }
+ *               category: { type: string, example: "Hosting" }
+ *               description: { type: string, example: "AWS bill" }
+ *               type: { type: string, enum: [income, expense], example: "expense" }
+ *     responses:
+ *       200:
+ *         description: Record successfully updated
+ *       400:
+ *         description: Validation error (Invalid amount, missing fields, etc.)
+ *       401:
+ *         description: Unauthorized (Invalid or missing session cookie)
+ *       403:
+ *         description: Access Denied (Only Admins can update records)
+ *       404:
+ *         description: Record not found in your project
+ *       500:
+ *         description: Failed to update record
+ */
 
 router.put("/:id", authGuard, async (req: Request, res: Response) => {
   const id = req.params.id as string;
@@ -98,6 +192,34 @@ router.put("/:id", authGuard, async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Update failed." });
   }
 });
+
+/**
+ * @swagger
+ * /api/records/{id}:
+ *   delete:
+ *     summary: Delete a financial record
+ *     tags: [Financial Records]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The record ID
+ *     responses:
+ *       200:
+ *         description: Record successfully deleted
+ *       401:
+ *         description: Unauthorized (Invalid or missing session cookie)
+ *       403:
+ *         description: Access Denied (Only Admins can delete records)
+ *       404:
+ *         description: Record not found
+ *       500:
+ *         description: Failed to delete record
+ */
 
 router.delete("/:id", authGuard, async (req: Request, res: Response) => {
   const id = req.params.id as string;
